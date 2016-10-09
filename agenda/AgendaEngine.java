@@ -75,15 +75,22 @@ public class AgendaEngine implements MeetingInterface{
 		owner.setUsername(user);
 		owner = users.get(users.indexOf(owner));
 		
+		//password
 		if(owner.getPassword().equals(password)){
+			//get this user's all meeting
 			ArrayList<Meeting> temp_meetings = owner.getMeetings();
+			//for each meeting
 			for(Meeting m : temp_meetings){
 				User temp_user = new User();
 				Meeting temp_meeting = new Meeting();
+				//find the booked user, and we will remove the meeting from the booked user
 				temp_user.setUsername(m.getBook_user());
 				temp_meeting.setUnique_id(m.getUnique_id());
+				//Override equals() for User and Meeting entity
 				users.get(users.indexOf(temp_user)).getMeetings().remove(temp_meeting);
 			}
+			//clear all the meetings
+			owner.getMeetings().clear();
 			return "success clear!";
 		}else{
 			return "password error!";
@@ -96,21 +103,29 @@ public class AgendaEngine implements MeetingInterface{
 		
 		User owner = new User();
 		owner.setUsername(user);
+		//Override equals() for User entity
+		//get the owners all attribute
 		owner = users.get(users.indexOf(owner));
 		
+		//password
 		if(owner.getPassword().equals(password)){
 			User temp_user = new User();
 			Meeting temp_meeting = new Meeting();
 			temp_meeting.setUnique_id(unique_id);
-			//temp_user.setUsername(owner.getUsername());
+			
+			//before_remove used to check whether has this id
+			//if the id not exist, the before_remove will == meetings.size()
 			int before_remove = owner.getMeetings().size();
 			temp_meeting = owner.getMeetings().get(owner.getMeetings().indexOf(temp_meeting));
+			
+			//get the booked user and clear the meeting from his meetings
 			temp_user.setUsername(temp_meeting.getBook_user());
 			owner.getMeetings().remove(temp_meeting);
 			if(before_remove == owner.getMeetings().size()){
 				return "No such meeting, perhaps already delete by other user";
 			}
 			
+			//Override equals() methods
 			users.get(users.indexOf(temp_user)).getMeetings().remove(temp_meeting);
 			return "you have delete the meeting with" + temp_user.getUsername()
 					+" at " + temp_meeting.getStart_time() + "   " + temp_meeting.getEnd_time();
@@ -118,50 +133,12 @@ public class AgendaEngine implements MeetingInterface{
 		}else{
 			return "password error!";
 		}
-		/*String temp_book_user = null;
-		Meeting temp_meeting = new Meeting();
-		temp_meeting.setUnique_id(unique_id);
-		//first loop : remove the start_user's meeting
-		for(User u : users){
-			if(u.getUsername().equals(user)){
-				if(u.getPassword().equals(password)){
-					for(Meeting m : u.getMeetings()){
-						if(m.equals(temp_meeting)){
-							temp_book_user = m.getBook_user();
-							u.getMeetings().remove(m);
-							break;
-						}
-					}
-					break;
-					//return "No such meeting!";
-				}else{
-					return "password error!";
-				}
-			}
-		}
-		if(temp_book_user == null){
-			return "No such meeting!";
-		}
-		//second loop : remove the invited user's meeting
-		for(User u :users){
-			if(temp_book_user.equals(u.getUsername())){
-				for(Meeting m : u.getMeetings()){
-					if(m.equals(temp_meeting)){
-						temp_meeting = m;
-						u.getMeetings().remove(m);
-						break;
-					}
-				}
-				break;
-			}
-		}
-		return "you have delete the meeting with" + temp_book_user
-				+" at " + temp_meeting.getStart_time() + "   " + temp_meeting.getEnd_time();*/
 	}
 
 	@Override
 	public Meeting[] queryMeeting(Date start_time, Date end_time, String user)
 			throws RemoteException {
+		//return all the meetings with Meeting[]
 		for(User u : users){
 			if(u.getUsername().equals(user)){
 				int size = u.getMeetings().size();
@@ -177,6 +154,8 @@ public class AgendaEngine implements MeetingInterface{
 		User temp = new User();
 		temp.setUsername(username);
 		temp.setPassword(password);
+		
+		//check if exists
 		for(User u : users){
 			if(u.equals(temp)){
 				return "exsit user named " + username; 
@@ -186,11 +165,12 @@ public class AgendaEngine implements MeetingInterface{
 		return "success create user named " + username;
 	}
 	
+	//A test function
 	public void test() throws RemoteException{
 		registerMeeting("yifangqiu", "123456");
 		registerMeeting("yuanyongdan", "123456");
 		System.out.println(queryMeeting(new Date(), new Date(), "yifangqiu").length);
-		System.out.println(addMeeting(new Date(), new Date(), "this is a test meeting", "yuanyongdan", "yifangqiu"));
+		System.out.println(addMeeting(new Date(), new Date(), "this is a love meeting", "yuanyongdan", "yifangqiu"));
 		Meeting[] ms = queryMeeting(new Date(), new Date(), "yifangqiu");
 		for(int i = 0; i < ms.length; i++){
 			System.out.println(ms[i].toString());
