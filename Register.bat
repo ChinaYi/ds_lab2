@@ -1,0 +1,1 @@
+java register.jar localhost
